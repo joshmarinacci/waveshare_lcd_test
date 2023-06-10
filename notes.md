@@ -69,12 +69,26 @@ The touch sensor is accessed over I2C and is documented in the PDF. It has three
 
 According to the docs the i2c communication can be anywhere from 10khz to 400khz rate.
 
-There is a second PDF in Chinese which details the meaning of the different registers. Combined with the example code, hopefully this is enough to reverse engineer the protocol.
+There is a [second PDF](docs/CST816S_register_declaration.pdf) in Chinese which details the 
+meaning of the different registers. Combined with the example code, hopefully this is 
+enough to reverse engineer the protocol. Below are my notes on the different registers
 
 
-Registers
+# Registers
+
 * 0x01 = Gesture ID
+  * reading a byte from this register returns a number for the kind of gesture. So far it seems that these are the values
+  * 0x00: seems to be when a finger is touching the screen?
+  * 0x01: did a bottom to top swipe
+  * 0x02: did a top to bottom swipe
+  * 0x03: did a right to left swipe
+  * 0x04: did a left to right swipe
+  * 0x05: when a touch is done??
+  * 0x0B: ???
+  * 0x0C: ???
+  * 
 * 0x02 = Finger Num
+  * this only ever seems to be zero for no fingers and 1 for a single active figure
 * 0x03 = XPosH
 * 0x04 = XposL
 * 0x05 = YposH
@@ -104,4 +118,5 @@ Registers
 * 0xFB = AutoReset
 * 0xFC = LongPressTime
 * 0xFD = IOCtl
+  * the PDF says that three bits are used for `SOFT_RST`, `IIC_OD` and `En1v8`. `SOFT_RST` probably means soft reset. So if we write a 1 to bit 2 of register 0xFD then it will do a soft reset?  
 * 0xFE = DisAutoSleep
