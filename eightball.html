@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style type="text/css">
+        canvas {
+            width: 720px;
+            image-rendering: pixelated;
+        }
+    </style>
+</head>
+<body>
+<button id="shake">shake</button><br/>
+<canvas id="canvas" width="240" height="240"></canvas>
+<script type="module">
+    import {Point, rand  } from "./node_modules/josh_js_util/dist/index.js"
+    const $ = (sel) => document.querySelector(sel)
+    const rad = 120
+
+    const phrases = [
+        'outlook grim',
+        'yes',
+        'no',
+        'try again',
+        'you might want to reconsider'
+
+    ]
+
+    let text = 'some text here'
+    let alpha = 0.0
+    function redraw() {
+        let canvas = $("#canvas")
+        let ctx = canvas.getContext('2d')
+        ctx.imageSmoothingEnabled = false
+        ctx.fillStyle = 'black'
+        ctx.fillRect(0,0,rad*2,rad*2)
+        ctx.save()
+        ctx.globalAlpha = alpha
+        ctx.translate(rad,rad)
+
+        function fillCircle(pt,rad,color) {
+            ctx.fillStyle = color
+            ctx.beginPath()
+            ctx.arc(pt.x,pt.y,rad,0,Math.PI*2)
+            ctx.fill()
+        }
+        function fillCenteredText(pt, text,color) {
+            ctx.fillStyle = color
+            ctx.font = '15px sans-serif'
+            ctx.textAlign = 'center'
+            ctx.textBaseline = 'middle'
+            ctx.fillText(text,pt.x,pt.y)
+        }
+
+        const pt = new Point(0,0)
+        fillCircle(pt,50,'green')
+        fillCenteredText(pt,text,'white')
+        ctx.restore()
+    }
+
+    let count = 0
+    function animate() {
+        alpha += 0.03
+        if(alpha >= 1.0) {
+            alpha = 1.0
+            redraw()
+        } else {
+            alpha += 0.03
+            redraw()
+            requestAnimationFrame(animate)
+        }
+    }
+
+    $("#shake").addEventListener('click',() => {
+        console.log('shaking')
+        const pick = (arr) => {
+            let n = Math.floor((Math.random()*arr.length))
+            return arr[n]
+        }
+        text = pick(phrases)
+        alpha = 0.0
+        animate()
+    })
+    redraw()
+
+</script>
+
+</body>
+</html>
