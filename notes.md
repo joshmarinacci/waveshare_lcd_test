@@ -86,10 +86,10 @@ enough to reverse engineer the protocol. Below are my notes on the different reg
   * 0x05: when a touch is done??
   * 0x0B: ???
   * 0x0C: ???
-  * 
 * 0x02 = Finger Num
   * this only ever seems to be zero for no fingers and 1 for a single active figure
 * 0x03 = XPosH
+  * this and the next three bytes represent the X and Y. I think they are in pairs for the low and high bytes of a 16bit integer
 * 0x04 = XposL
 * 0x05 = YposH
 * 0x06 = YposL
