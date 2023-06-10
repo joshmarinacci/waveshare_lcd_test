@@ -89,39 +89,57 @@ enough to reverse engineer the protocol. Below are my notes on the different reg
   * 0x03: did a right to left swipe
   * 0x04: did a left to right swipe
   * 0x05: when a touch is done??
-  * 0x0B: ???
-  * 0x0C: ???
+  * 0x0B: double tap
+  * 0x0C: long press
+
 * 0x02 = Finger Num
   * this only ever seems to be zero for no fingers and 1 for a single active figure
+
 * 0x03 = XPosH
   * this and the next three bytes represent the X and Y. I think they are in pairs for the low and high bytes of a 16bit integer
 * 0x04 = XposL
 * 0x05 = YposH
 * 0x06 = YposL
+
 * 0xB0 = BPC0H
 * 0xB1 = BPC0L
 * 0xB2 = BPC1H
 * 0xB3 = BPC1L
+
 * 0xA7 = ChipID
+  * I always get 181 on my device
 * 0xA8 = ProjID
+  * I always get 0 on my device
 * 0xA9 = FwVersion
+  * I always get 1 on my device
 * 0xEC = MotionMask
+  * I *think* this is used to decide which gesture will wake up the device. Left to Right, Up to down, or tap. There is a bit flag to control each one.
 * 0xED = IrqPluseWidth
+  * I get `1` on my device. 
+
 * 0xEE = NorScanPer
 * 0xEF = MotionS1Angle
+  * always returns 6
 * 0xF0 = LpScanRaw1H
 * 0xF1 = LpScanRaw1L
 * 0xF2 = LpScanRaw2H
 * 0xF3 = LpScanRaw2L
 * 0xF4 = LpAutoWakeTime
+  * I'm getting 4. I assume this is some time unit
+
 * 0xF5 = LpScanTH
 * 0xF6 = LpScanWin
 * 0xF7 = LpScanFreq
 * 0xF8 = LpScanIdac
 * 0xF9 = AutoSleepTime
+  * I'm getting 2. So it would sleep after 2 seconds?
 * 0xFA = IrqCtl
+  * using the high four bits, it can be EnTest, EnTouch, EnChange, EnMotion, and OnceWLP. I think this controls
+  what events will make the sensor wake up.
+  * example code sets 0x41 for point mode, 0x11 for gesture mode with the motion mask, or 0x71 for ???, 
 * 0xFB = AutoReset
 * 0xFC = LongPressTime
 * 0xFD = IOCtl
   * the PDF says that three bits are used for `SOFT_RST`, `IIC_OD` and `En1v8`. `SOFT_RST` probably means soft reset. So if we write a 1 to bit 2 of register 0xFD then it will do a soft reset?  
 * 0xFE = DisAutoSleep
+  * write a 1 to disable sleep mode

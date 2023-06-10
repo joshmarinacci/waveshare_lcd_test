@@ -8,6 +8,16 @@ import gc9a01
 from vectorio import Rectangle, Circle, Polygon
 
 
+displayio.release_displays()
+
+spi = busio.SPI(clock=board.LCD_CLK, MOSI=board.LCD_DIN)
+# LCD_RST is 12 in the regular, but 13 for the touch version
+display_bus = displayio.FourWire(spi, command=board.LCD_DC, chip_select=board.LCD_CS,reset=board.GP13)
+display = gc9a01.GC9A01(display_bus, width=240, height=240, backlight_pin=board.LCD_BL)
+
+main = displayio.Group()
+
+
 class Touch_CST816T(object):
     #Initialize the touch chip  初始化触摸芯片
     def __init__(self, address=0x15, mode=0, i2c_num=1, i2c_sda=6, i2c_scl=7, int_pin=21, rst_pin=22, LCD=None):
@@ -153,15 +163,35 @@ class Touch_CST816T(object):
             self.l = 50
 
 
+circ_palette = displayio.Palette(2)
+circ_palette[0] = (255,0,255)
+circ_palette[1] = (255,255,255)
+circ = Circle(pixel_shader=circ_palette, radius=30)
+circ.x = 120
+circ.y = 120
+circ.color_index = 1
+circ.hidden = True
+main.append(circ)
+
+display.show(main)
 
 # setup accel
 touch = Touch_CST816T()
-print("setup teh touch")
+print("setup teh touch", touch._read_byte(0xA7), touch._read_byte(0xA8), touch._read_byte(0xA9))
+print('pulse width', touch._read_byte(0xED))
+print('auto wake time', touch._read_byte(0xF4))
+print('auto sleep time', touch._read_byte(0xF9))
 while True:
-    time.sleep(0.1)
+    time.sleep(0.01)
     state = touch._read_byte(0x01)
+    num = touch._read_byte(0x02)
     xy_point = touch._read_block(0x03,4)
     x_point= ((xy_point[0]&0x0f)<<8)+xy_point[1]
     y_point= ((xy_point[2]&0x0f)<<8)+xy_point[3]
-    print("state",state, "x", x_point, "y", y_point)
+    angle = touch._read_byte(0xEF)
+    print("state",state, "num",num, "x", x_point, "y", y_point, 'angle',angle)
+    circ.x = x_point
+    circ.y = y_point
+    circ.hidden = (num == 0)
+
 
