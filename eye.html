@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+  <style type="text/css">
+    canvas {
+      width: 720px;
+      image-rendering: pixelated;
+    }
+  </style>
+</head>
+<body>
+<button id="play">play</button><br/>
+<canvas id="canvas" width="240" height="240"></canvas>
+<script type="module">
+  import {Point, toRadians  } from "./node_modules/josh_js_util/dist/index.js"
+  const $ = (sel) => document.querySelector(sel)
+  const rad = 120
+
+  function redraw() {
+    let canvas = $("#canvas")
+    let ctx = canvas.getContext('2d')
+    ctx.imageSmoothingEnabled = false
+    ctx.fillStyle = 'black'
+    ctx.fillRect(0,0,rad*2,rad*2)
+    ctx.save()
+    ctx.translate(rad,rad)
+
+    function fillCircle(pt,rad,color) {
+      ctx.fillStyle = color
+      ctx.beginPath()
+      ctx.arc(pt.x,pt.y,rad,0,Math.PI*2)
+      ctx.fill()
+    }
+    function strokeCircle(pt,rad,color) {
+      ctx.strokeStyle = color
+      ctx.beginPath()
+      ctx.arc(pt.x,pt.y,rad,0,Math.PI*2)
+      ctx.stroke()
+    }
+    function fillCenteredText(pt, text,color) {
+      ctx.fillStyle = color
+      ctx.font = '15px sans-serif'
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      ctx.fillText(text,pt.x,pt.y)
+    }
+
+    const pt = new Point(0,0)
+    fillCircle(pt,120,'gold')
+    for(let i=0; i<360; i+=12) {
+      let th = toRadians(i)
+      let x = Math.sin(th)*105
+      let y = Math.cos(th)*105
+      strokeCircle(new Point(x,y), 10, 'black')
+    }
+    strokeCircle(new Point(0,0),92,'black')
+    strokeCircle(new Point(0,0),82,'black')
+
+    ctx.translate(0.5,0.5)
+
+    ctx.strokeStyle = 'black'
+    ctx.beginPath()
+    ctx.arc(0,  45, 90, toRadians(-150), toRadians(-30))
+    ctx.arc(0, -45, 90, toRadians(30),  toRadians(150))
+    ctx.stroke()
+
+    ctx.fillStyle = 'white'
+    ctx.beginPath()
+    ctx.arc(0,  45, 90, toRadians(-150), toRadians(-30))
+    ctx.arc(0, -45, 90, toRadians(30),  toRadians(150))
+    ctx.fill()
+
+    ctx.fillStyle = 'red'
+    ctx.beginPath()
+    ctx.arc(0, 0, 45, toRadians(0), toRadians(360))
+    ctx.fill()
+
+
+    ctx.fillStyle = 'black'
+    ctx.beginPath()
+    ctx.arc(0, 0, 25, toRadians(0), toRadians(360))
+    ctx.fill()
+
+    ctx.restore()
+  }
+
+  let count = 0
+  function animate() {
+    alpha += 0.03
+    if(alpha >= 1.0) {
+      alpha = 1.0
+      redraw()
+    } else {
+      alpha += 0.03
+      redraw()
+      requestAnimationFrame(animate)
+    }
+  }
+
+  $("#play").addEventListener('click',() => {
+    // const pick = (arr) => {
+    //   let n = Math.floor((Math.random()*arr.length))
+    //   return arr[n]
+    // }
+    // text = pick(phrases)
+    // alpha = 0.0
+    // animate()
+  })
+  redraw()
+
+</script>
+
+</body>
+</html>
