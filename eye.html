@@ -11,18 +11,22 @@
   </style>
 </head>
 <body>
-<button id="play">play</button><br/>
+<button id="play">replay</button><br/>
 <canvas id="canvas" width="240" height="240"></canvas>
 <script type="module">
   import {Point, toRadians  } from "./node_modules/josh_js_util/dist/index.js"
   const $ = (sel) => document.querySelector(sel)
   const rad = 120
 
-  function redraw() {
+  const GOLD =    '#ecbe05'
+  const SPEED = 2.0
+  const quadraticEasing = (t) => t*t*t
+
+  function redraw(tval) {
     let canvas = $("#canvas")
     let ctx = canvas.getContext('2d')
     ctx.imageSmoothingEnabled = false
-    ctx.fillStyle = 'black'
+    ctx.fillStyle = 'white'
     ctx.fillRect(0,0,rad*2,rad*2)
     ctx.save()
     ctx.translate(rad,rad)
@@ -47,68 +51,125 @@
       ctx.fillText(text,pt.x,pt.y)
     }
 
-    const pt = new Point(0,0)
-    fillCircle(pt,120,'gold')
-    for(let i=0; i<360; i+=12) {
-      let th = toRadians(i)
-      let x = Math.sin(th)*105
-      let y = Math.cos(th)*105
-      strokeCircle(new Point(x,y), 10, 'black')
+    function drawRing() {
+      const pt = new Point(0,0)
+      fillCircle(pt,120,GOLD)
+      for(let i=0; i<360; i+=360/(6*4)) {
+        let th = toRadians(i)
+        let x = Math.sin(th)*107.5
+        let y = Math.cos(th)*107.5
+        ctx.lineWidth = 2
+        strokeCircle(new Point(x,y), 10, 'black')
+      }
+      ctx.lineWidth = 4;
+      strokeCircle(new Point(0,0),120,'black')
+      strokeCircle(new Point(0,0),96,'black')
+      strokeCircle(new Point(0,0),78,'black')
     }
-    strokeCircle(new Point(0,0),92,'black')
-    strokeCircle(new Point(0,0),82,'black')
+
+    drawRing()
 
     ctx.translate(0.5,0.5)
 
-    ctx.strokeStyle = 'black'
-    ctx.beginPath()
-    ctx.arc(0,  45, 90, toRadians(-150), toRadians(-30))
-    ctx.arc(0, -45, 90, toRadians(30),  toRadians(150))
-    ctx.stroke()
 
-    ctx.fillStyle = 'white'
-    ctx.beginPath()
-    ctx.arc(0,  45, 90, toRadians(-150), toRadians(-30))
-    ctx.arc(0, -45, 90, toRadians(30),  toRadians(150))
-    ctx.fill()
+    function drawEye(tval) {
+      // black eye edge
+      ctx.strokeStyle = 'black'
+      ctx.lineWidth = 2;
+      ctx.beginPath()
+      ctx.arc(0,  45, 90, toRadians(-150), toRadians(-30))
+      ctx.stroke()
 
-    ctx.fillStyle = 'red'
-    ctx.beginPath()
-    ctx.arc(0, 0, 45, toRadians(0), toRadians(360))
-    ctx.fill()
+      // white eye interior
+      fillCircle(new Point(0,0),80,'white')
+      // ctx.fillStyle = 'white'
+      // ctx.beginPath()
+      // ctx.arc(0,  45, 90, toRadians(-150), toRadians(-30))
+      // ctx.arc(0, -45, 90, toRadians(30),  toRadians(150))
+      // ctx.fill()
+      // ctx.strokeStyle = 'black'
+      // ctx.stroke()
+
+      // red eye color
+      ctx.fillStyle = 'red'
+      ctx.beginPath()
+      ctx.arc(0, 0, 45, toRadians(0), toRadians(360))
+      ctx.fill()
+      ctx.strokeStyle = 'black'
+      ctx.stroke()
+
+      // black pupil
+      ctx.fillStyle = 'black'
+      ctx.beginPath()
+      ctx.arc(0, 0, 20, toRadians(0), toRadians(360))
+      ctx.fill()
 
 
-    ctx.fillStyle = 'black'
-    ctx.beginPath()
-    ctx.arc(0, 0, 25, toRadians(0), toRadians(360))
-    ctx.fill()
+      //eye lid
+      ctx.strokeStyle = 'green'
+      ctx.lineWidth = 1
+      let r = 78
+      let src = new Point(-r,0)
+      let ctrl = new Point(0,tval*100)
+      let dst = new Point(r,0)
+
+      // lower lid
+      ctx.beginPath()
+      ctx.moveTo(src.x,src.y)
+      ctx.quadraticCurveTo(ctrl.x,ctrl.y,dst.x,dst.y)
+      ctx.arc(0, 0, r, toRadians(0),  toRadians(180))
+      ctx.fillStyle = GOLD
+      ctx.fill()
+      ctx.lineWidth = 4
+      ctx.strokeStyle = 'black'
+      ctx.stroke()
+
+      // upper lid
+      ctx.beginPath()
+      ctx.arc(0, 0, r, toRadians(0),  toRadians(180), true)
+      ctx.moveTo(src.x,src.y)
+      ctx.quadraticCurveTo(ctrl.x,-ctrl.y,dst.x,dst.y)
+      ctx.fillStyle = GOLD
+      ctx.fill()
+      ctx.lineWidth = 4
+      ctx.strokeStyle = 'black'
+      ctx.stroke()
+
+    }
+    drawEye(tval)
 
     ctx.restore()
   }
 
-  let count = 0
-  function animate() {
-    alpha += 0.03
-    if(alpha >= 1.0) {
-      alpha = 1.0
-      redraw()
-    } else {
-      alpha += 0.03
-      redraw()
-      requestAnimationFrame(animate)
+  function go() {
+    let start = Date.now()
+    let dir = 1
+    let running = true
+    function animateIt(v) {
+      let now = Date.now()
+      let diff = now-start
+      let t = (diff/1000)*SPEED
+      const easing = quadraticEasing
+      let tt = easing(t)
+      if(tt > 1.0) {
+        tt = 1.0
+        running = false
+      }
+      if(tt < 0) {
+        tt = 0
+      }
+      redraw(tt)
+      if(running) requestAnimationFrame(animateIt)
     }
+    animateIt()
   }
-
   $("#play").addEventListener('click',() => {
-    // const pick = (arr) => {
-    //   let n = Math.floor((Math.random()*arr.length))
-    //   return arr[n]
-    // }
-    // text = pick(phrases)
-    // alpha = 0.0
-    // animate()
+    go()
   })
-  redraw()
+  redraw(0)
+  setTimeout(() => {
+    go()
+  },100)
 
 </script>
 
