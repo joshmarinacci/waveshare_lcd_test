@@ -58,3 +58,50 @@ LCD_MOSI = 11
 LCD_MISO = 12
 LCD_RST = 13
 LCD_BL = 25
+
+
+
+
+
+# touch sensor
+
+The touch sensor is accessed over I2C and is documented in the PDF. It has three *modes*.  In *dynamic* mode the chip is always scanning and you can always get the current touch.  In *standby* mode the chip scans at a lower frequency and notifies the main CPU using an interrupt when a gesture occurs. It is not clear how a gesture is defined. Any touch? A specific length of time? An up or down swipe?  The third mode is a *sleep* mode where it does not scan at all to save power.
+
+According to the docs the i2c communication can be anywhere from 10khz to 400khz rate.
+
+There is a second PDF in Chinese which details the meaning of the different registers. Combined with the example code, hopefully this is enough to reverse engineer the protocol.
+
+
+Registers
+* 0x01 = Gesture ID
+* 0x02 = Finger Num
+* 0x03 = XPosH
+* 0x04 = XposL
+* 0x05 = YposH
+* 0x06 = YposL
+* 0xB0 = BPC0H
+* 0xB1 = BPC0L
+* 0xB2 = BPC1H
+* 0xB3 = BPC1L
+* 0xA7 = ChipID
+* 0xA8 = ProjID
+* 0xA9 = FwVersion
+* 0xEC = MotionMask
+* 0xED = IrqPluseWidth
+* 0xEE = NorScanPer
+* 0xEF = MotionS1Angle
+* 0xF0 = LpScanRaw1H
+* 0xF1 = LpScanRaw1L
+* 0xF2 = LpScanRaw2H
+* 0xF3 = LpScanRaw2L
+* 0xF4 = LpAutoWakeTime
+* 0xF5 = LpScanTH
+* 0xF6 = LpScanWin
+* 0xF7 = LpScanFreq
+* 0xF8 = LpScanIdac
+* 0xF9 = AutoSleepTime
+* 0xFA = IrqCtl
+* 0xFB = AutoReset
+* 0xFC = LongPressTime
+* 0xFD = IOCtl
+* 0xFE = DisAutoSleep
