@@ -5,16 +5,18 @@
   <title>Title</title>
   <style type="text/css">
     canvas {
-      width: 720px;
+      /* width: 720px; */
       image-rendering: pixelated;
     }
   </style>
 </head>
 <body>
-<button id="play">replay</button><br/>
+<button id="play">replay</button>
+<button id="save">save</button><br/>
 <canvas id="canvas" width="240" height="240"></canvas>
 <script type="module">
   import {Point, toRadians  } from "./node_modules/josh_js_util/dist/index.js"
+  import {forceDownloadBlob, canvas_to_blob} from "./node_modules/josh_web_util/dist/index.js"
   const $ = (sel) => document.querySelector(sel)
   const rad = 120
 
@@ -104,36 +106,38 @@
       ctx.arc(0, 0, 20, toRadians(0), toRadians(360))
       ctx.fill()
 
+      function draw_eyelids() {
+        //eye lid
+        ctx.strokeStyle = 'green'
+        ctx.lineWidth = 1
+        let r = 78
+        let src = new Point(-r,0)
+        let ctrl = new Point(0,tval*100)
+        let dst = new Point(r,0)
 
-      //eye lid
-      ctx.strokeStyle = 'green'
-      ctx.lineWidth = 1
-      let r = 78
-      let src = new Point(-r,0)
-      let ctrl = new Point(0,tval*100)
-      let dst = new Point(r,0)
+        // lower lid
+        ctx.beginPath()
+        ctx.moveTo(src.x,src.y)
+        ctx.quadraticCurveTo(ctrl.x,ctrl.y,dst.x,dst.y)
+        ctx.arc(0, 0, r, toRadians(0),  toRadians(180))
+        ctx.fillStyle = GOLD
+        ctx.fill()
+        ctx.lineWidth = 4
+        ctx.strokeStyle = 'black'
+        ctx.stroke()
 
-      // lower lid
-      ctx.beginPath()
-      ctx.moveTo(src.x,src.y)
-      ctx.quadraticCurveTo(ctrl.x,ctrl.y,dst.x,dst.y)
-      ctx.arc(0, 0, r, toRadians(0),  toRadians(180))
-      ctx.fillStyle = GOLD
-      ctx.fill()
-      ctx.lineWidth = 4
-      ctx.strokeStyle = 'black'
-      ctx.stroke()
-
-      // upper lid
-      ctx.beginPath()
-      ctx.arc(0, 0, r, toRadians(0),  toRadians(180), true)
-      ctx.moveTo(src.x,src.y)
-      ctx.quadraticCurveTo(ctrl.x,-ctrl.y,dst.x,dst.y)
-      ctx.fillStyle = GOLD
-      ctx.fill()
-      ctx.lineWidth = 4
-      ctx.strokeStyle = 'black'
-      ctx.stroke()
+        // upper lid
+        ctx.beginPath()
+        ctx.arc(0, 0, r, toRadians(0),  toRadians(180), true)
+        ctx.moveTo(src.x,src.y)
+        ctx.quadraticCurveTo(ctrl.x,-ctrl.y,dst.x,dst.y)
+        ctx.fillStyle = GOLD
+        ctx.fill()
+        ctx.lineWidth = 4
+        ctx.strokeStyle = 'black'
+        ctx.stroke()
+      }
+      draw_eyelids()
 
     }
     drawEye(tval)
@@ -170,6 +174,14 @@
   setTimeout(() => {
     go()
   },100)
+
+  $("#save").addEventListener('click',async () => {
+    const blob = await canvas_to_blob($("#canvas"))
+    console.log("blob is",blob)
+    let url = URL.createObjectURL(blob)
+    console.log("url is",url)
+    forceDownloadBlob('bg.png',blob)
+  })
 
 </script>
 

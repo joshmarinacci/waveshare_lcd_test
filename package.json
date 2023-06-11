@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/joshmarinacci/waveshare_lcd_test#readme",
   "dependencies": {
-    "josh_js_util": "^0.1.11"
+    "josh_js_util": "^0.1.11",
+    "josh_web_util": "0.0.4"
   }
 }
