@@ -174,16 +174,28 @@ class Touch_CST816T(object):
 # setup accel
 touch = Touch_CST816T()
 
-pal = displayio.Pallet()
-pal[0] = 0x000000
-pal[1] = 0xFFFFFF
-bitmap = displayio.Bitmap(240,240,2)
-bitmap.fill(0)
+pal = displayio.Palette(6)
+pal[0] = 0xFF0000
+pal[1] = 0xCC0000
+pal[2] = 0x880000
+pal[3] = 0x660000
+pal[4] = 0x330000
+pal[5] = 0x000000
+
+bitmap = displayio.Bitmap(240,240,len(pal))
+bitmap.fill(5)
 tilemap = displayio.TileGrid(bitmap,pixel_shader=pal)
 
 main.append(tilemap)
 
+def kline(pt1, pt2, color):
+    bitmaptools.draw_line(bitmap, pt1['x'], pt1['y'], pt2['x'], pt2['y'], color)
+    bitmaptools.draw_line(bitmap, 240-pt1['x'], pt1['y'], 240-pt2['x'], pt2['y'], color)
+    bitmaptools.draw_line(bitmap, pt1['x'], 240-pt1['y'], pt2['x'], 240-pt2['y'], color)
+    bitmaptools.draw_line(bitmap, 240-pt1['x'], 240-pt1['y'], 240-pt2['x'], 240-pt2['y'], color)
 
+prev = { 'x':0, 'y':0,}
+color = 3
 while True:
     time.sleep(0.01)
     state = touch._read_byte(0x01)
@@ -191,8 +203,12 @@ while True:
     xy_point = touch._read_block(0x03,4)
     x_point= ((xy_point[0]&0x0f)<<8)+xy_point[1]
     y_point= ((xy_point[2]&0x0f)<<8)+xy_point[3]
-    print('num',num,x_point,y_point)
-    bitmap[x_point,y_point] = 1
+    curr = { 'x':x_point, 'y':y_point}
+    color += 1
+    if color > 5:
+        color = 2
+    kline(prev, curr, color)
+    prev = curr
     display.refresh()
 
 
