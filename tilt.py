@@ -158,9 +158,13 @@ main.append(circ)
 
 display.show(main)
 
+
+xsamples = []
+ysamples = []
+
 while True:
     display.refresh()
-    time.sleep(0.01)
+    time.sleep(0.08)
     xyz = qmi.read_xyz()
     accel = {}
     gyro = {}
@@ -172,8 +176,16 @@ while True:
     gyro['y'] = xyz[4]
     gyro['z'] = xyz[5]       
     # print('accel',accel)
-    circ.x = 120 + int(accel['x']*100)
-    circ.y = 120 + int(accel['y']*100*-1)
+    xsamples.append(accel['x'])
+    ysamples.append(accel['y'])
+    if len(xsamples) > 5:
+        xsamples.pop(0)
+    if len(ysamples) > 5:
+        ysamples.pop(0)
+    xavg = sum(xsamples)/len(xsamples)
+    yavg = sum(ysamples)/len(ysamples)
+    circ.x = 120 + int(xavg*100)
+    circ.y = 120 + int(yavg*100*-1)
 
 
 
