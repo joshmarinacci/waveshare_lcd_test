@@ -1,27 +1,12 @@
 import time
-import board, busio
+import board
 import displayio
-import gc9a01
-import gifio
 import vectorio
-import bitmaptools
-import gc
 import adafruit_imageload
+from waveshare128 import setup_display
 
-# SPEED = 24_000_000
-SPEED = 100_000_000
-# SPEED = 48000000
-# SPEED = 99000000
 TARGET_FPS = 100
-
-# setup the display
-displayio.release_displays()
-spi = busio.SPI(clock=board.LCD_CLK, MOSI=board.LCD_DIN)
-# LCD_RST is 12 in the regular, but 13 for the touch version
-display_bus = displayio.FourWire(spi, command=board.LCD_DC, chip_select=board.LCD_CS,reset=board.GP13, baudrate=SPEED)
-display = gc9a01.GC9A01(display_bus, width=240, height=240, backlight_pin=board.LCD_BL, rotation=0, auto_refresh=False)
-
-
+display = setup_display()
 
 # make the main group
 main = displayio.Group()

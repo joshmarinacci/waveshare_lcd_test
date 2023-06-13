@@ -9,17 +9,12 @@
 # Copy resulting file to CIRCUITPY drive
 
 import time
-import board, busio
+import board
 import displayio
-import gc9a01
 import gifio
+from waveshare128 import setup_display
 
-
-displayio.release_displays()
-spi = busio.SPI(clock=board.LCD_CLK, MOSI=board.LCD_DIN)
-# LCD_RST is 12 in the regular, but 13 for the touch version
-display_bus = displayio.FourWire(spi, command=board.LCD_DC, chip_select=board.LCD_CS,reset=board.GP13)
-display = gc9a01.GC9A01(display_bus, width=240, height=240, backlight_pin=board.LCD_BL, rotation=0)
+display = setup_display()
 
 main = displayio.Group()
 
@@ -30,7 +25,7 @@ display.show(main) # put main group on display, everything goes in maingroup
 # bitmap = displayio.OnDiskBitmap(open("deathstar_tile.bmp", "rb"))
 # deathstar = displayio.TileGrid(bitmap, pixel_shader=bitmap.pixel_shader, tile_width=240, tile_height=240 )
 
-odg = gifio.OnDiskGif('/eye.gif')
+odg = gifio.OnDiskGif('eye.gif')
 
 face = displayio.TileGrid(odg.bitmap,
                           pixel_shader=displayio.ColorConverter
@@ -43,7 +38,6 @@ display.refresh()
 # i_inc = 1
 while True:
     time.sleep(0.1)
-    print("hi")
     odg.next_frame()
 
     # print("deathstar ranging ", i)
