@@ -103,6 +103,21 @@ save_button = Button(
 page2.append(save_button)
 layout.add_content(page2, page_name='page 2')
 
+#Page 3
+# setup page 3
+page3 = displayio.Group()
+page3bg = Rectangle(pixel_shader=pal,x=0,y=0,width=240,height=240)
+page3bg.color_index = BLUE
+page3.append(page3bg) 
+secondsText = Label(
+    font=terminalio.FONT,
+    text = str(r.datetime.tm_hour) + ":"+str(r.datetime.tm_min) + ":" +str(r.datetime.tm_sec),
+    x=2,
+    y=115,
+    scale=5,
+)
+page3.append(secondsText)
+layout.add_content(page3, page_name='page 3')
 
 
 main.append(layout)
@@ -115,6 +130,7 @@ while True:
     time_label.text = 'foo time'
     hour = r.datetime.tm_hour
     minute = r.datetime.tm_min
+
     if hour > 12:
         hour = hour - 12
     h1 = int(hour / 10)
@@ -122,8 +138,8 @@ while True:
     m1 = int(minute / 10)
     m2 = minute % 10
     time_label.text = str(h1)+str(h2)+':'+str(m1)+str(m2)
-
-
+    print(r.datetime.tm_sec)
+    secondsText.text = str(h1)+str(h2)+':'+str(m1)+str(m2) + ":" + str(r.datetime.tm_sec)
 
     touch.update()
     p = (touch.x,touch.y,0)
@@ -131,15 +147,16 @@ while True:
         # print('touched',p,touch.gestureId, touch.fingerNum)
         if hour_setter.contains(p):
             hour_setter.selected(p)
-            time.sleep(0.15)  # add a short delay to reduce accidental press
+            time.sleep(0.10)  # add a short delay to reduce accidental press
         if min_setter.contains(p):
             min_setter.selected(p)
-            time.sleep(0.15)  # add a short delay to reduce accidental press
+            time.sleep(0.10)  # add a short delay to reduce accidental press
         if save_button.contains(p):
             save_button.selected = True
-            time.sleep(0.15)
+            time.sleep(0.10)
             save_button.selected = False
             print('setting the time to',hour_setter.value,min_setter.value)
+            r.datetime = time.struct_time((2023, 1, 1, hour_setter.value+1, min_setter.value, 15, 0, -1, -1))
 
     if touch.fingerNum == 0 and prevnum == 1:
         # print("end gesture", touch.gestureId)
@@ -153,5 +170,4 @@ while True:
                 layout.showing_page_index -= 1
     prevnum = touch.fingerNum
     display.refresh()
-
 
