@@ -66,3 +66,17 @@ on the touch screen.
 Copy one of the example programs to `/CIRCUIPY/code.py`. Leave the libs as they are. 
 Example: to run the Kalidascope drawing example, copy `kalidedraw.py` to `code.py` on your device.
 
+
+
+# customizing images
+
+Some of the examples use images. You can replace them with your own, but make sure
+to use the same size and format them as indexed BMP files. [Read more about CP BMP formats](https://learn.adafruit.com/creating-your-first-tilemap-game-with-circuitpython/indexed-bmp-graphics)
+
+Convert a PNG on disk to BMP
+
+```shell
+convert digits.png -colors 64 -type palette -compress None BMP3:digits.bmp
+```
+
+Then copy `digits.bmp` to the device drive
