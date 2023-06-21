@@ -45,6 +45,12 @@ circup freeze
 circup install gc9a01
 ```
 
+Certain demos also need:
+
+```shell
+circup install adafruit_displayio_layout adafruit_button
+```
+
 Now you should see the boot text on the device's display, and then a white circle. You can drag the circle around
 with your finger on the touch screen. On the console you'll see constant output about the state of touches
 on the touch screen.

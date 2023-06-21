@@ -7,6 +7,7 @@ from adafruit_displayio_layout.widgets.flip_input import FlipInput
 from vectorio import Circle, Rectangle
 from waveshare128 import setup_display, Touch_CST816T
 from adafruit_button import Button
+from adafruit_bitmap_font import bitmap_font
 
 import rtc
 import terminalio
@@ -33,6 +34,10 @@ BLUE = 3
 
 layout = PageLayout(x=0, y=0)
 
+# load our custom font. 10px version of chivo
+font = bitmap_font.load_font("chivo10.bdf")
+
+
 
 # setup page 1
 view_time_page = displayio.Group()
@@ -41,12 +46,15 @@ rect.color_index = RED
 view_time_page.append(rect)
 
 time_label = Label(
-    font=terminalio.FONT,
+    font=font,
     text="The time is here",
     x=120-40,
     y=100,
-    scale=3,
+    scale=1,
 )
+time_label.anchored_position = (120,120)
+time_label.anchor_point = (0.5,1.0)
+
 view_time_page.append(time_label)
 layout.add_content(view_time_page, page_name='page 1')
 
@@ -61,20 +69,19 @@ hour_setter = FlipInput(
     value_list=["{0:02d}".format(x) for x in range(1, 12)],
     # use a list of strings from 01 through 31
     # use the {0:02d} format string to always use two digits (e.g. '03')
-    font_scale=4,
+    font=font,
     horizontal=False,  # use vertical arrows
     # animation_time=0.4,
 )
-hour_setter.x = 60
+hour_setter.x = 50
 hour_setter.y = 80
 page2.append(hour_setter)
 
 separator_label = Label(
-    font=terminalio.FONT,
+    font=font,
     text=":",
-    x=100,
-    y=100,
-    scale=3,
+    x=110,
+    y=85,
 )
 page2.append(separator_label)
 
@@ -83,11 +90,11 @@ min_setter = FlipInput(
     value_list=["{0:02d}".format(x) for x in range(0, 60)],
     # use a list of strings from 01 through 31
     # use the {0:02d} format string to always use two digits (e.g. '03')
-    font_scale=4,
+    font=font,
     horizontal=False,  # use vertical arrows
     # animation_time=0.4,
 )
-min_setter.x = 120
+min_setter.x = 130
 min_setter.y = 80
 page2.append(min_setter)
 
@@ -127,36 +134,40 @@ display.show(main)
 touch = Touch_CST816T()
 prevnum = 0
 while True:
-    time_label.text = 'foo time'
-    hour = r.datetime.tm_hour
-    minute = r.datetime.tm_min
+    if layout.showing_page_index == 0:
+        # print("clock page")
+        # time_label.text = 'foo time'
+        hour = r.datetime.tm_hour
+        minute = r.datetime.tm_min
 
-    if hour > 12:
-        hour = hour - 12
-    h1 = int(hour / 10)
-    h2 = hour % 10
-    m1 = int(minute / 10)
-    m2 = minute % 10
-    time_label.text = str(h1)+str(h2)+':'+str(m1)+str(m2)
-    print(r.datetime.tm_sec)
-    secondsText.text = str(h1)+str(h2)+':'+str(m1)+str(m2) + ":" + str(r.datetime.tm_sec)
+        if hour > 12:
+            hour = hour - 12
+        h1 = int(hour / 10)
+        h2 = hour % 10
+        m1 = int(minute / 10)
+        m2 = minute % 10
+        time_label.text = str(h1)+str(h2)+':'+str(m1)+str(m2)
+        # print(r.datetime.tm_sec)
+        secondsText.text = str(h1)+str(h2)+':'+str(m1)+str(m2) + ":" + str(r.datetime.tm_sec)
 
     touch.update()
     p = (touch.x,touch.y,0)
-    if touch.gestureId == 0 and touch.fingerNum == 1 and prevnum == 0:
-        # print('touched',p,touch.gestureId, touch.fingerNum)
-        if hour_setter.contains(p):
-            hour_setter.selected(p)
-            time.sleep(0.10)  # add a short delay to reduce accidental press
-        if min_setter.contains(p):
-            min_setter.selected(p)
-            time.sleep(0.10)  # add a short delay to reduce accidental press
-        if save_button.contains(p):
-            save_button.selected = True
-            time.sleep(0.10)
-            save_button.selected = False
-            print('setting the time to',hour_setter.value,min_setter.value)
-            r.datetime = time.struct_time((2023, 1, 1, hour_setter.value+1, min_setter.value, 15, 0, -1, -1))
+    if layout.showing_page_index == 1:
+        # print("set time page")
+        if touch.gestureId == 0 and touch.fingerNum == 1 and prevnum == 0:
+            # print('touched',p,touch.gestureId, touch.fingerNum)
+            if hour_setter.contains(p):
+                hour_setter.selected(p)
+                time.sleep(0.10)  # add a short delay to reduce accidental press
+            if min_setter.contains(p):
+                min_setter.selected(p)
+                time.sleep(0.10)  # add a short delay to reduce accidental press
+            if save_button.contains(p):
+                save_button.selected = True
+                time.sleep(0.10)
+                save_button.selected = False
+                print('setting the time to',hour_setter.value,min_setter.value)
+                r.datetime = time.struct_time((2023, 1, 1, hour_setter.value+1, min_setter.value, 15, 0, -1, -1))
 
     if touch.fingerNum == 0 and prevnum == 1:
         # print("end gesture", touch.gestureId)
