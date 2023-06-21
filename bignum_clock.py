@@ -1,19 +1,25 @@
 import board
 import time
 import displayio
+import vectorio
 from waveshare128 import setup_display
 import rtc
 
 r = rtc.RTC()
-r.datetime = time.struct_time((2023, 6, 12,   22, 10, -1,   0, -1, -1))
+# r.datetime = time.struct_time((2023, 6, 12,   22, 10, -1,   0, -1, -1))
 
-current_time = r.datetime
+r.datetime = time.struct_time((2023, 1, 1, 8, 9, 15, 0, -1, -1))
 
-print("datetime", current_time)
 
 display = setup_display()
 
 main = displayio.Group()
+
+bgpalette = displayio.Palette(1)
+bgpalette[0] = 0xFFffFF # black
+bgrect = vectorio.Rectangle(pixel_shader=bgpalette, width=240, height=240)
+bgrect.color_index = 0
+main.append(bgrect)
 
 # load spritesheet
 bitmap = displayio.OnDiskBitmap("/digits.bmp")
@@ -27,11 +33,13 @@ tile_grid[1,0] = 2
 tile_grid[0,1] = 5
 tile_grid[1,1] = 7
 
+
 main.append(tile_grid)
 
 display.show(main)
 
 while True:
+    print("datetime", r.datetime)
     hour = r.datetime.tm_hour
     minute = r.datetime.tm_min
     if hour > 12:
