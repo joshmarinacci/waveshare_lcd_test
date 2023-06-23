@@ -1,10 +1,11 @@
 import board
 import displayio
+import analogio
 import busio
 import gc9a01
 
 def setup_display(speed=100_000_000):
-    print("hello")
+    print("display setup")
     # setup the display
     displayio.release_displays()
     spi = busio.SPI(clock=board.LCD_CLK, MOSI=board.LCD_DIN)
@@ -293,3 +294,81 @@ class QMI8658_Accelerometer(object):
             xyz[i]=raw_xyz[i]/acc_lsb_div#(acc_lsb_div/1000.0)
             xyz[i+3]=raw_xyz[i+3]*1.0/gyro_lsb_div
         return xyz
+
+
+class Battery(object):
+    # Initialize the battery
+    # returns: nothing
+    def __init__(self, pin=board.BAT_ADC):
+        self._pin = analogio.AnalogIn(pin)
+        self._max_voltage = 4.14
+        self._min_voltage = 3.4
+        self._max_diff = self._max_voltage - self._min_voltage
+        self._diff = 0.0
+        self._voltage = 0.0
+        self._percent = 0.0
+        self._charging = False
+        self._discharging = False
+        self._full = False
+        self._empty = False
+        self._update()
+
+    # Update the battery status
+    # returns: nothing
+    def _update(self):
+        # Read the battery voltage
+        self._voltage = self._pin.value * 3.3 / 65535 * 2
+        self._diff = self._max_voltage - self._voltage
+        # Convert the voltage to a percentage
+        if self._voltage > self._max_voltage:
+            self._percent = 100.0
+        elif self._voltage < self._min_voltage:
+            self._percent = 0.0
+        else:
+            self._percent = (self._diff / self._max_diff) * 100.0 
+        # Determine the charging status
+        if self._voltage > 4.14:
+            self._charging = True
+            self._discharging = False
+            self._full = True
+            self._empty = False
+        elif self._voltage < 3.4:
+            self._charging = False
+            self._discharging = False
+            self._full = False
+            self._empty = True
+        else:
+            self._charging = False
+            self._discharging = True
+            self._full = False
+            self._empty = False
+
+    # Get the battery voltage
+    # returns: the battery voltage
+    @property
+    def voltage(self):
+        self._update()
+        return self._voltage
+
+    # Get the battery percentage
+    # returns: the battery percentage
+    @property
+    def percent(self):
+        self._update()
+        return self._percent
+
+    # Get the charging status
+    # returns: True if the battery is charging, False otherwise
+    @property
+    def charging(self):
+        self._update()
+        return self._charging
+
+    # Get the discharging status
+    # returns: True if the battery is discharging, False otherwise
+    @property
+    def discharging(self):
+        self._update()
+        return self._discharging
+
+
