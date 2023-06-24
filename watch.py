@@ -47,13 +47,16 @@ touch = Touch_CST816T()
 prevnum = 0
 
 logger = logging.getLogger('default')
+fh = None
 
 if supervisor.runtime.usb_connected:
     print('serial conencted')
 else:
     storage.remount("/", False)
-    logger.addHandler(logging.FileHandler('/log.txt'))
+    fh = logging.FileHandler('/foo.txt','a')
+    logger.addHandler(fh)
     logger.info("doing a log event")
+    fh.stream.flush()
 
 logger.setLevel(logging.DEBUG)
 
@@ -86,6 +89,8 @@ def setup_clock_screen():
     layout.add_content(view_time_page, page_name='clock')
 
 def update_clock_screen():
+    # print("clock page")
+    # time_label.text = 'foo time'
     hour = r.datetime.tm_hour
     minute = r.datetime.tm_min
 
@@ -96,6 +101,8 @@ def update_clock_screen():
     m1 = int(minute / 10)
     m2 = minute % 10
     time_label.text = str(h1)+str(h2)+':'+str(m1)+str(m2)
+    # print(r.datetime.tm_sec)
+    # secondsText.text = str(h1)+str(h2)+':'+str(m1)+str(m2) + ":" + str(r.datetime.tm_sec)
 
 setup_clock_screen()
 def setup_settime_screen():
@@ -133,6 +140,7 @@ def setup_settime_screen():
         # use the {0:02d} format string to always use two digits (e.g. '03')
         font=font,
         horizontal=False,  # use vertical arrows
+        # animation_time=0.4,
     )
     min_setter.x = 130
     min_setter.y = 80
@@ -191,11 +199,14 @@ def update_battery_screen():
 
 setup_battery_screen()
 
+print('annoying')
 count = 0
 while True:
     count += 1
-    if (count % 100) == 0:
+    if (count % 50) == 0:
         logger.info('battery value: %d', battery._pin.value)
+        if fh:
+            fh.stream.flush()
     touch.update()
     battery._update()
     if layout.showing_page_name == 'clock':
