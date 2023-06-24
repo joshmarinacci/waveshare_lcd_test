@@ -199,8 +199,12 @@ def update_battery_screen():
 
 setup_battery_screen()
 
-print('annoying')
+long_happened = False
+
 count = 0
+sleeping = False
+display.brightness = 0.5
+last_input = time.monotonic()
 while True:
     count += 1
     if (count % 50) == 0:
@@ -209,22 +213,35 @@ while True:
             fh.stream.flush()
     touch.update()
     battery._update()
+    if time.monotonic() - last_input > 10:
+        display.brightness = 0
     if layout.showing_page_name == 'clock':
         update_clock_screen()
     if layout.showing_page_index == 'settime':
         update_settime_screen()
     if layout.showing_page_name == 'battery':
         update_battery_screen()
+    if touch.gestureId == 0x0c and touch.fingerNum == 1 and not(long_happened):
+        long_happened = True
+        display.brightness = 1.0
+        last_input = time.monotonic()
+    if touch.gestureId == 0x0b:
+        print("0b")
+    if touch.fingerNum == 0:
+        long_happened = False
     if touch.fingerNum == 0 and prevnum == 1:
-        # print("end gesture", touch.gestureId)
         if touch.gestureId == 3:
-            # print("going to the right", layout.showing_page_index, len(layout.page_content_list))
+            # print("going to the right", layout.showing_page_name)
+            last_input = time.monotonic()
             if layout.showing_page_index < len(layout.page_content_list)-1:
                 layout.showing_page_index += 1
         if touch.gestureId == 4:
-            # print("going to the left", layout.showing_page_index, len(layout.page_content_list))
+            # print("going to the left", layout.showing_page_name)
             if layout.showing_page_index > 0:
                 layout.showing_page_index -= 1
+            last_input = time.monotonic()
+        if touch.gestureId == 0x0b:
+            print('double tap')
     prevnum = touch.fingerNum
     display.refresh()
 
