@@ -5,7 +5,6 @@ import busio
 import gc9a01
 
 def setup_display(speed=100_000_000):
-    print("hello")
     # setup the display
     displayio.release_displays()
     spi = busio.SPI(clock=board.LCD_CLK, MOSI=board.LCD_DIN)
