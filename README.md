@@ -86,3 +86,36 @@ convert digits.png -colors 64 -type palette -compress None BMP3:digits.bmp
 ```
 
 Then copy `digits.bmp` to the device drive
+
+
+
+
+        # 3.7V 250mAh battery
+voltage = value * 3.3 / 65535*2
+   
+currently reporting value = 9266, voltage is 0.8
+
+switch back to BAT_ADC
+while charging getting 32920 to 328700 which equals voltage of 3.31 to 3.30 v or 100%
+while not charging:
+27168 to 27200
+
+5 min later
+26500
+26944
+
+15 min later
+26200
+
+45min later
+25000
+
+20 min later: 24300,
+
+
+
+
+so far, anything above 27000 seems to be charging. maybe anything over 30k?
+
+
+probably should do a running average the last 10 measurements

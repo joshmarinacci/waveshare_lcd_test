@@ -5,7 +5,7 @@ import busio
 import gc9a01
 
 def setup_display(speed=100_000_000):
-    print("display setup")
+    print("hello")
     # setup the display
     displayio.release_displays()
     spi = busio.SPI(clock=board.LCD_CLK, MOSI=board.LCD_DIN)
@@ -300,9 +300,12 @@ class Battery(object):
     # Initialize the battery
     # returns: nothing
     def __init__(self, pin=board.BAT_ADC):
-        self._pin = analogio.AnalogIn(pin)
-        self._max_voltage = 4.14
-        self._min_voltage = 3.4
+        self._pin = analogio.AnalogIn(board.BAT_ADC)
+        # self._max_voltage = 4.14
+        self._max_voltage = 3.3
+        # self._min_voltage = 3.4
+        self._min_voltage = 1.8
+        # 1.8V to 3.3V
         self._max_diff = self._max_voltage - self._min_voltage
         self._diff = 0.0
         self._voltage = 0.0
@@ -311,13 +314,16 @@ class Battery(object):
         self._discharging = False
         self._full = False
         self._empty = False
+        self._samples = [0,0,0,0,0,0]
         self._update()
 
     # Update the battery status
     # returns: nothing
     def _update(self):
         # Read the battery voltage
-        self._voltage = self._pin.value * 3.3 / 65535 * 2
+        self._samples.append(self._pin.value)
+        self._samples.pop(0)        
+        self._voltage = self._pin.value * (3.3 / 65535) * 2
         self._diff = self._max_voltage - self._voltage
         # Convert the voltage to a percentage
         if self._voltage > self._max_voltage:
@@ -326,6 +332,7 @@ class Battery(object):
             self._percent = 0.0
         else:
             self._percent = (self._diff / self._max_diff) * 100.0 
+        print("percentage",self._pin.value, self._voltage, self._diff, self._percent)
         # Determine the charging status
         if self._voltage > 4.14:
             self._charging = True

@@ -187,19 +187,19 @@ def update_settime_screen():
             r.datetime = time.struct_time((2023, 1, 1, hour_setter.value+1, min_setter.value, 15, 0, -1, -1))
 
 def update_battery_screen():
-    print("doing battery page")
-    print("voltage ", str(battery.voltage))
-    print("charging", battery.charging)
-    print('discharging', battery.discharging)
-    battery_label.text = str(battery.percent)
-    time.sleep(0.1)
+    # print("doing battery page")
+    # print("voltage ", str(battery.voltage))
+    # print("charging", battery.charging)
+    # print('discharging', battery.discharging)
+    avg = sum(battery._samples)/len(battery._samples)
+    battery_label.text = str(int(avg)) + " " + str(battery.voltage)
+    # time.sleep(0.1)
 
-
-    
 while True:
     if layout.showing_page_index == 0:
         update_clock_screen()
     touch.update()
+    battery._update()
     if layout.showing_page_index == 1:
         update_settime_screen()
     if layout.showing_page_name == 'battery':
