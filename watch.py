@@ -200,11 +200,13 @@ def update_battery_screen():
 setup_battery_screen()
 
 long_happened = False
+double_happened = False
 
 count = 0
 sleeping = False
 display.brightness = 0.5
 last_input = time.monotonic()
+touch.gestureId = 0
 while True:
     count += 1
     if (count % 50) == 0:
@@ -222,26 +224,26 @@ while True:
     if layout.showing_page_name == 'battery':
         update_battery_screen()
     if touch.gestureId == 0x0c and touch.fingerNum == 1 and not(long_happened):
+        logger.info("long touch happened")
         long_happened = True
         display.brightness = 1.0
         last_input = time.monotonic()
-    if touch.gestureId == 0x0b:
-        print("0b")
+    if touch.gestureId == 0x0b and not(double_happened):
+        logger.info("double tap happened")
+        double_happened = True
+        display.brightness = 1.0
+        last_input = time.monotonic()
     if touch.fingerNum == 0:
         long_happened = False
     if touch.fingerNum == 0 and prevnum == 1:
+        double_happened = False
+        last_input = time.monotonic()
         if touch.gestureId == 3:
-            # print("going to the right", layout.showing_page_name)
-            last_input = time.monotonic()
             if layout.showing_page_index < len(layout.page_content_list)-1:
                 layout.showing_page_index += 1
         if touch.gestureId == 4:
-            # print("going to the left", layout.showing_page_name)
             if layout.showing_page_index > 0:
                 layout.showing_page_index -= 1
-            last_input = time.monotonic()
-        if touch.gestureId == 0x0b:
-            print('double tap')
     prevnum = touch.fingerNum
     display.refresh()
 
