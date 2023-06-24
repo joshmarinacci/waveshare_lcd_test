@@ -16,6 +16,7 @@ import rtc
 import storage
 import terminalio
 import adafruit_logging as logging
+import joshutils
 import supervisor
 
 # setup the RTC and time
@@ -24,7 +25,7 @@ r = rtc.RTC()
 
 display = setup_display()
 
-SCREEN_OFF_DELAY = 5
+SCREEN_OFF_DELAY = 15
 
 # setup the screens
 main = displayio.Group()
@@ -51,16 +52,10 @@ touch = Touch_CST816T()
 prevnum = 0
 
 logger = logging.getLogger('default')
-fh = None
 
-if supervisor.runtime.usb_connected:
-    print('serial conencted')
-else:
-    storage.remount("/", False)
-    fh = logging.FileHandler('/foo.txt','a')
-    logger.addHandler(fh)
-    logger.info("doing a log event")
-    fh.stream.flush()
+logger.addHandler(joshutils.JoshLogger('/log.txt','a'))
+# sl = joshutils.ScreenLogger(display,main)
+# logger.addHandler(sl)
 
 logger.setLevel(logging.DEBUG)
 
@@ -206,22 +201,12 @@ setup_battery_screen()
 
 def take_screenshot():
     logger.info("taking screenshot")
-    if fh:
-        fh.stream.flush()
     try:
         save_pixels('/screenshot.bmp',pixel_source=display)
         logger.info("saved the screenshot")
-        if fh:
-            fh.stream.flush()
     except BaseException as e:
         logger.error("couldnt take screenshot")
-        if fh:
-            fh.stream.flush()
         logger.error(''.join(traceback.format_exception(e)))
-        if fh:
-            fh.stream.flush()
-    if fh:
-        fh.stream.flush()
     display.brightness = 0.1
     time.sleep(0.2)
     display.brightness = 1.0
@@ -234,12 +219,11 @@ sleeping = False
 display.brightness = 0.5
 last_input = time.monotonic()
 touch.gestureId = 0
+print("right here now")
 while True:
     count += 1
     if (count % 50) == 0:
         logger.info('battery value: %d %f %d %s', battery._pin.value, battery.voltage, battery.percent, battery.charging)
-        if fh:
-            fh.stream.flush()
     touch.update()
     battery._update()
     if time.monotonic() - last_input > SCREEN_OFF_DELAY:
