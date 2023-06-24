@@ -301,9 +301,10 @@ class Battery(object):
     def __init__(self, pin=board.BAT_ADC):
         self._pin = analogio.AnalogIn(board.BAT_ADC)
         # self._max_voltage = 4.14
-        self._max_voltage = 3.3
+        self._max_voltage = 28000 * (3.3/65535) * 2
         # self._min_voltage = 3.4
-        self._min_voltage = 1.8
+        self._min_voltage = 22661 * (3.3/65535) * 2
+        print('max / min volt', self._max_voltage, self._min_voltage)
         # 1.8V to 3.3V
         self._max_diff = self._max_voltage - self._min_voltage
         self._diff = 0.0
@@ -331,9 +332,8 @@ class Battery(object):
             self._percent = 0.0
         else:
             self._percent = (self._diff / self._max_diff) * 100.0 
-        # print("percentage",self._pin.value, self._voltage, self._diff, self._percent)
         # Determine the charging status
-        if self._voltage > 4.14:
+        if self._voltage > 3.3:
             self._charging = True
             self._discharging = False
             self._full = True
@@ -348,7 +348,7 @@ class Battery(object):
             self._discharging = True
             self._full = False
             self._empty = False
-
+        # print("percentage",self._pin.value, self._voltage, self._diff, self._percent, self._charging)
     # Get the battery voltage
     # returns: the battery voltage
     @property

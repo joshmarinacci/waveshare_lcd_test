@@ -116,6 +116,8 @@ while not charging:
 
 
 so far, anything above 27000 seems to be charging. maybe anything over 30k?
-
+while charging it is over 30k.
+after running for over 4 hours w/ the screen dimmed to 0% but otherwise still running,
+it died at 22661. So we can say that is our minimum battery value.
 
 probably should do a running average the last 10 measurements

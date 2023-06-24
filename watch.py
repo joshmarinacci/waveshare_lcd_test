@@ -210,7 +210,7 @@ touch.gestureId = 0
 while True:
     count += 1
     if (count % 50) == 0:
-        logger.info('battery value: %d', battery._pin.value)
+        logger.info('battery value: %d %f %d %s', battery._pin.value, battery.voltage, battery.percent, battery.charging)
         if fh:
             fh.stream.flush()
     touch.update()
