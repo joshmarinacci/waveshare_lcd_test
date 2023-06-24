@@ -54,8 +54,6 @@ prevnum = 0
 logger = logging.getLogger('default')
 
 logger.addHandler(joshutils.JoshLogger('/log.txt','a'))
-# sl = joshutils.ScreenLogger(display,main)
-# logger.addHandler(sl)
 
 logger.setLevel(logging.DEBUG)
 
@@ -199,6 +197,14 @@ def update_battery_screen():
 setup_battery_screen()
 
 
+def setup_logger_screen():
+    logger_page = displayio.Group()
+    sl = joshutils.ScreenLogger(display,logger_page)
+    logger.addHandler(sl)
+    layout.add_content(logger_page, page_name='logger')
+
+setup_logger_screen()
+
 def take_screenshot():
     logger.info("taking screenshot")
     try:
@@ -216,7 +222,7 @@ double_happened = False
 
 count = 0
 sleeping = False
-display.brightness = 0.5
+display.brightness = 1.0
 last_input = time.monotonic()
 touch.gestureId = 0
 print("right here now")
