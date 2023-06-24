@@ -2,6 +2,7 @@ import board
 import time
 import displayio
 import digitalio
+import traceback
 from adafruit_displayio_layout.layouts.page_layout import PageLayout
 from adafruit_display_text.bitmap_label import Label
 from adafruit_displayio_layout.widgets.flip_input import FlipInput
@@ -9,6 +10,7 @@ from vectorio import Circle, Rectangle
 from waveshare128 import setup_display, Touch_CST816T, Battery
 from adafruit_button import Button
 from adafruit_bitmap_font import bitmap_font
+from adafruit_bitmapsaver import save_pixels
 import analogio
 import rtc
 import storage
@@ -21,6 +23,8 @@ r = rtc.RTC()
 # r.datetime = time.struct_time((2023, 6, 12,   22, 10, -1,   0, -1, -1))
 
 display = setup_display()
+
+SCREEN_OFF_DELAY = 5
 
 # setup the screens
 main = displayio.Group()
@@ -199,6 +203,29 @@ def update_battery_screen():
 
 setup_battery_screen()
 
+
+def take_screenshot():
+    logger.info("taking screenshot")
+    if fh:
+        fh.stream.flush()
+    try:
+        save_pixels('/screenshot.bmp',pixel_source=display)
+        logger.info("saved the screenshot")
+        if fh:
+            fh.stream.flush()
+    except BaseException as e:
+        logger.error("couldnt take screenshot")
+        if fh:
+            fh.stream.flush()
+        logger.error(''.join(traceback.format_exception(e)))
+        if fh:
+            fh.stream.flush()
+    if fh:
+        fh.stream.flush()
+    display.brightness = 0.1
+    time.sleep(0.2)
+    display.brightness = 1.0
+
 long_happened = False
 double_happened = False
 
@@ -215,7 +242,7 @@ while True:
             fh.stream.flush()
     touch.update()
     battery._update()
-    if time.monotonic() - last_input > 10:
+    if time.monotonic() - last_input > SCREEN_OFF_DELAY:
         display.brightness = 0
     if layout.showing_page_name == 'clock':
         update_clock_screen()
@@ -225,6 +252,8 @@ while True:
         update_battery_screen()
     if touch.gestureId == 0x0c and touch.fingerNum == 1 and not(long_happened):
         logger.info("long touch happened")
+        if display.brightness > 0:
+            take_screenshot()
         long_happened = True
         display.brightness = 1.0
         last_input = time.monotonic()

@@ -304,7 +304,7 @@ class Battery(object):
         self._max_voltage = 28000 * (3.3/65535) * 2
         # self._min_voltage = 3.4
         self._min_voltage = 22661 * (3.3/65535) * 2
-        print('max / min volt', self._max_voltage, self._min_voltage)
+        # print('max / min volt', self._max_voltage, self._min_voltage)
         # 1.8V to 3.3V
         self._max_diff = self._max_voltage - self._min_voltage
         self._diff = 0.0
