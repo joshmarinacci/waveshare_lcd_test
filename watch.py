@@ -40,17 +40,20 @@ WHITE = 1
 RED = 2
 BLUE = 3
 
+print("initial displays")
 layout = PageLayout(x=0, y=0)
 # load our custom font. 10px version of chivo
 font = bitmap_font.load_font("chivo10.bdf")
 main.append(layout)
 display.show(main)
 
+print("battery setup")
 battery = Battery()
+print("touch setup")
 touch = Touch_CST816T()
-
 prevnum = 0
 
+print("logger setup")
 logger = logging.getLogger('default')
 
 logger.addHandler(joshutils.JoshLogger('/log.txt','a'))
@@ -63,6 +66,35 @@ battery_label = None
 hour_setter = None
 min_setter = None
 save_button = None
+start_screen_label = None
+start_screen = None
+
+
+def setup_start_screen():
+    global start_screen
+    global start_screen_label
+    start_screen = displayio.Group()
+    start_screen_bg = Rectangle(pixel_shader=pal, x=0,y=0,width=240,height=240)
+    start_screen_bg.color_index = BLUE
+    start_screen.append(start_screen_bg)
+    start_screen_label = Label(
+        font=terminalio.FONT,
+        text='starting...',
+        x=120-40,
+        y=100,
+    )
+    start_screen.append(start_screen_label)
+    main.append(start_screen)
+
+def set_start_phase(text):
+    start_screen_label.text = text
+    display.refresh()
+
+def remove_start_screen():
+    main.remove(start_screen)    
+
+setup_start_screen()
+set_start_phase('start')
 
 def setup_clock_screen():
     global time_label
@@ -86,7 +118,6 @@ def setup_clock_screen():
     layout.add_content(view_time_page, page_name='clock')
 
 def update_clock_screen():
-    # print("clock page")
     # time_label.text = 'foo time'
     hour = r.datetime.tm_hour
     minute = r.datetime.tm_min
@@ -101,7 +132,10 @@ def update_clock_screen():
     # print(r.datetime.tm_sec)
     # secondsText.text = str(h1)+str(h2)+':'+str(m1)+str(m2) + ":" + str(r.datetime.tm_sec)
 
+set_start_phase('clock')
 setup_clock_screen()
+
+
 def setup_settime_screen():
     global hour_setter
     global min_setter
@@ -172,6 +206,7 @@ def update_settime_screen():
             save_button.selected = False
             print('setting the time to',hour_setter.value,min_setter.value)
             r.datetime = time.struct_time((2023, 1, 1, hour_setter.value+1, min_setter.value, 15, 0, -1, -1))
+set_start_phase('settime screen')
 setup_settime_screen()
 
 def setup_battery_screen():
@@ -194,6 +229,7 @@ def update_battery_screen():
     avg = sum(battery._samples)/len(battery._samples)
     battery_label.text = "avg value " + str(int(avg)) + "\nvoltage: " + str(battery.voltage) + "\npercentage: " + str(battery.percent)
 
+set_start_phase('battery screen')
 setup_battery_screen()
 
 
@@ -203,6 +239,7 @@ def setup_logger_screen():
     logger.addHandler(sl)
     layout.add_content(logger_page, page_name='logger')
 
+set_start_phase('logger screen')
 setup_logger_screen()
 
 def take_screenshot():
@@ -225,7 +262,9 @@ sleeping = False
 display.brightness = 1.0
 last_input = time.monotonic()
 touch.gestureId = 0
-print("right here now")
+print("setup done")
+set_start_phase('done')
+remove_start_screen()
 while True:
     count += 1
     if (count % 50) == 0:
