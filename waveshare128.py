@@ -331,7 +331,7 @@ class Battery(object):
             self._percent = 0.0
         else:
             self._percent = (self._diff / self._max_diff) * 100.0 
-        print("percentage",self._pin.value, self._voltage, self._diff, self._percent)
+        # print("percentage",self._pin.value, self._voltage, self._diff, self._percent)
         # Determine the charging status
         if self._voltage > 4.14:
             self._charging = True
