@@ -14,6 +14,7 @@ from clock import ClockScreen, SetDatetimeScreen
 from battery import BatteryScreen
 from adafruit_bitmapsaver import save_pixels
 import traceback
+from starfield import StarfieldScreen
 
 clock = rtc.RTC()
 
@@ -98,12 +99,14 @@ async def main():
     clockScreen = ClockScreen(system)
     datetime = SetDatetimeScreen(system)
     battery = BatteryScreen(system)
+    starfield = StarfieldScreen(system)
 
     system.display.brightness = 1.0
     system.touch.gestureId = 0
     print("setup done")
 
     while True:
+        system.battery._update()
         system.touch.update()
         system.handle_swipe()
         if system.layout.showing_page_name == 'clock':
@@ -112,8 +115,10 @@ async def main():
             datetime.update(system)
         if system.layout.showing_page_name == 'battery':
             battery.update(system)
-
-        system.battery._update()
+        if system.layout.showing_page_name == 'starfield':
+            starfield.update(system)
+        # handle long press
+        # handle double tap
         system.prevnum = system.touch.fingerNum
         system.display.refresh()
 asyncio.run(main())
