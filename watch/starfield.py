@@ -1,6 +1,12 @@
 import displayio
+import terminalio
 from random import randint
 from vectorio import Circle, Rectangle
+import math
+from adafruit_datetime import datetime
+from adafruit_display_text.bitmap_label import Label
+
+
 
 def reset_star(star):
     star[0] = 120
@@ -22,10 +28,36 @@ def check_star(star):
         return reset_star(star)
     return star
 
+def position(now=None): 
+    if now is None: 
+        now = datetime.now()
+
+    diff = now - datetime(2001, 1, 1)
+    days = diff.days + diff.seconds / 86400
+    lunations = 0.20439731 + (days * 0.03386319269)
+    return lunations % 1
+
+def phase(pos): 
+   index = (pos * 8) + 0.5
+   index = math.floor(index)
+   return {
+      0: "New Moon", 
+      1: "Waxing Crescent", 
+      2: "First Quarter", 
+      3: "Waxing Gibbous", 
+      4: "Full Moon", 
+      5: "Waning Gibbous", 
+      6: "Last Quarter", 
+      7: "Waning Crescent"
+   }[int(index) & 7]
+
     
 class StarfieldScreen:
     def __init__(self, system) -> None:
-
+        pos = position()
+        phasename = phase(pos)
+        roundedpos = round(float(pos), 3)
+        print('moon', phasename, roundedpos)
         self.stars = []
         self.page = displayio.Group()
         self.pal = displayio.Palette(2)
@@ -34,6 +66,14 @@ class StarfieldScreen:
         self.bitmap = displayio.Bitmap(240,240,len(self.pal))
         self.tilegrid = displayio.TileGrid(self.bitmap, pixel_shader=self.pal)
         self.page.append(self.tilegrid)
+        self.label = Label(
+            font=terminalio.FONT,
+            text=":",
+            anchor_point=(0.5,0.5),
+            anchored_position=(120,120),
+        )
+        self.label.text = phasename
+        self.page.append(self.label)
         system.layout.add_content(self.page, page_name='starfield')
 
     def update(self, system):
