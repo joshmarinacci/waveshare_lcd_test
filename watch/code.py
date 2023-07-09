@@ -35,9 +35,7 @@ class WatchSystem:
         self.logger = logging.getLogger('default')
         self.logger.addHandler(joshutils.JoshLogger('/log.txt','a'))
         self.logger.setLevel(logging.DEBUG)
-        self.layout = PageLayout(x=0, y=0)
         self.main = displayio.Group()
-        self.main.append(self.layout)
         self.display = setup_display()
         self.display.show(self.main)
         self.touch = Touch_CST816T()
@@ -46,27 +44,32 @@ class WatchSystem:
         self.prevnum = 0
         self.last_input = time.monotonic()
         self.screens = []
+        self.currentScreen = None
 
     def add_screen(self, screen):
         self.screens.append(screen)
-        self.layout.add_content(screen.view, screen.name)
+        # self.layout.add_content(screen.view, screen.name)
+
+    def set_current_screen(self, screen):
+        if self.currentScreen != None:
+            self.main.remove(self.currentScreen.view)
+        self.currentScreen = screen
+        self.main.append(self.currentScreen.view)
 
     def update_screen(self):
-        screen = self.screens[self.layout.showing_page_index]
-        screen.update(self)
+        if self.currentScreen != None:
+            self.currentScreen.update(self)
 
     def handle_swipe(self):
         if self.touch.fingerNum == 0 and self.prevnum == 1:
             self.last_input = time.monotonic()
+            n = self.screens.index(self.currentScreen)
             if self.touch.gestureId == 3:
-                # swipe left
-                self.logger.info("swipe left")
-                if self.layout.showing_page_index < len(self.layout.page_content_list)-1:
-                    self.layout.showing_page_index += 1
+                if n < len(self.screens) - 1:
+                    self.set_current_screen(self.screens[n+1])
             if self.touch.gestureId == 4:
-                self.logger.info("swipe right")
-                if self.layout.showing_page_index > 0:
-                    self.layout.showing_page_index -= 1
+                if n > 0:
+                    self.set_current_screen(self.screens[n-1])
 
     def take_screenshot(self):
         self.logger.info("taking screenshot")
@@ -112,6 +115,7 @@ async def main():
     system.add_screen(BatteryScreen(system))
     system.add_screen(SetDatetimeScreen(system))
 
+    system.set_current_screen(system.screens[0])
     system.display.brightness = 1.0
     system.touch.gestureId = 0
 
@@ -124,5 +128,5 @@ async def main():
         # handle double tap
         system.prevnum = system.touch.fingerNum
         system.display.refresh()
-        
+
 asyncio.run(main())
