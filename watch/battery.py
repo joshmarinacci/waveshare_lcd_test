@@ -6,10 +6,11 @@ import terminalio
 
 class BatteryScreen:
     def __init__(self, system) -> None:
-        self.page = displayio.Group()
+        self.name = 'battery'
+        self.view = displayio.Group()
         bg = Rectangle(pixel_shader=system.pal,width=240,height=240)
         bg.color_index = 2
-        self.page.append(bg)
+        self.view.append(bg)
         self.label = Label(
             font=terminalio.FONT,
             text='battery',
@@ -17,8 +18,7 @@ class BatteryScreen:
             x=20,
             y=80,
         )
-        self.page.append(self.label)
-        system.layout.add_content(self.page, page_name='battery')
+        self.view.append(self.label)
 
     def update(self, system):
         avg = sum(system.battery._samples)/len(system.battery._samples)

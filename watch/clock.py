@@ -8,10 +8,11 @@ import terminalio
 
 class ClockScreen:
     def __init__(self, system) -> None:
-        self.view_time_page = displayio.Group()
+        self.name = 'clock'
+        self.view = displayio.Group()
         rect = Rectangle(pixel_shader=system.pal, x=0,y=0,width=240,height=240)
         rect.color_index = 2
-        self.view_time_page.append(rect)
+        self.view.append(rect)
 
         self.time_label = Label(
             font=system.font,
@@ -23,8 +24,7 @@ class ClockScreen:
         self.time_label.anchored_position = (120,120)
         self.time_label.anchor_point = (0.5,1.0)
 
-        self.view_time_page.append(self.time_label)
-        system.layout.add_content(self.view_time_page, page_name='clock')
+        self.view.append(self.time_label)
 
 
     def update(self, system):
@@ -41,22 +41,23 @@ class ClockScreen:
 
 class SetDatetimeScreen:
     def __init__(self, system) -> None:
-        self.page = displayio.Group()
+        self.view = displayio.Group()
+        self.name = 'settime'
         bg = Rectangle(pixel_shader=system.pal,x=0,y=0,width=240,height=240)
         bg.color_index = 3
-        self.page.append(bg)
+        self.view.append(bg)
         self.hour_setter = FlipInput(
             system.display,
             value_list=["{0:02d}".format(x) for x in range(1, 12)],
             # use a list of strings from 01 through 31
             # use the {0:02d} format string to always use two digits (e.g. '03')
-            font=system.font,
+            font=terminalio.FONT,
             horizontal=False,  # use vertical arrows
             # animation_time=0.4,
         )
         self.hour_setter.x = 50
         self.hour_setter.y = 80
-        self.page.append(self.hour_setter)
+        self.view.append(self.hour_setter)
 
         separator_label = Label(
             font=system.font,
@@ -64,20 +65,20 @@ class SetDatetimeScreen:
             x=110,
             y=85,
         )
-        self.page.append(separator_label)
+        self.view.append(separator_label)
 
         self.min_setter = FlipInput(
             system.display,
             value_list=["{0:02d}".format(x) for x in range(0, 60)],
             # use a list of strings from 01 through 31
             # use the {0:02d} format string to always use two digits (e.g. '03')
-            font=system.font,
+            font=terminalio.FONT,
             horizontal=False,  # use vertical arrows
             # animation_time=0.4,
         )
         self.min_setter.x = 130
         self.min_setter.y = 80
-        self.page.append(self.min_setter)
+        self.view.append(self.min_setter)
 
         self.save_button = Button(
             x=70,
@@ -88,8 +89,7 @@ class SetDatetimeScreen:
             label='Save',
             label_font=terminalio.FONT,
         )
-        self.page.append(self.save_button)
-        system.layout.add_content(self.page, page_name='settime')
+        self.view.append(self.save_button)
 
 
     def update(self, system):

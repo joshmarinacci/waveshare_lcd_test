@@ -54,18 +54,19 @@ def phase(pos):
     
 class StarfieldScreen:
     def __init__(self, system) -> None:
+        self.name = 'starfield'
         pos = position()
         phasename = phase(pos)
         roundedpos = round(float(pos), 3)
         print('moon', phasename, roundedpos)
         self.stars = []
-        self.page = displayio.Group()
+        self.view = displayio.Group()
         self.pal = displayio.Palette(2)
         self.pal[0] = 0x000000
         self.pal[1] = 0xffffff
         self.bitmap = displayio.Bitmap(240,240,len(self.pal))
         self.tilegrid = displayio.TileGrid(self.bitmap, pixel_shader=self.pal)
-        self.page.append(self.tilegrid)
+        self.view.append(self.tilegrid)
         self.label = Label(
             font=terminalio.FONT,
             text=":",
@@ -73,8 +74,7 @@ class StarfieldScreen:
             anchored_position=(120,120),
         )
         self.label.text = phasename
-        self.page.append(self.label)
-        system.layout.add_content(self.page, page_name='starfield')
+        self.view.append(self.label)
 
     def update(self, system):
         if len(self.stars) < 50:

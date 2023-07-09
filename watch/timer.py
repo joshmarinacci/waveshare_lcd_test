@@ -9,6 +9,7 @@ import terminalio
 
 class TimerScreen:
     def __init__(self, system) -> None:
+        self.name = 'timer'
         self.view = displayio.Group()
         self.timer_running = False
         rect = Rectangle(pixel_shader=system.pal, x=0,y=0,width=240,height=240)
@@ -60,8 +61,6 @@ class TimerScreen:
         self.time_view.append(self.time_label)
         self.view.append(self.time_view)
         self.time_view.hidden = True
-
-        system.layout.add_content(self.view, page_name='timer')
 
 
     def update(self, system):

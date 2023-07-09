@@ -15,6 +15,7 @@ from battery import BatteryScreen
 from adafruit_bitmapsaver import save_pixels
 import traceback
 from starfield import StarfieldScreen
+from timer import TimerScreen
 
 clock = rtc.RTC()
 
@@ -44,6 +45,15 @@ class WatchSystem:
         self.clock = clock
         self.prevnum = 0
         self.last_input = time.monotonic()
+        self.screens = []
+
+    def add_screen(self, screen):
+        self.screens.append(screen)
+        self.layout.add_content(screen.view, screen.name)
+
+    def update_screen(self):
+        screen = self.screens[self.layout.showing_page_index]
+        screen.update(self)
 
     def handle_swipe(self):
         if self.touch.fingerNum == 0 and self.prevnum == 1:
@@ -96,29 +106,23 @@ async def main():
     global logger
     
     system = WatchSystem()
-    clockScreen = ClockScreen(system)
-    datetime = SetDatetimeScreen(system)
-    battery = BatteryScreen(system)
-    starfield = StarfieldScreen(system)
+    system.add_screen(ClockScreen(system))
+    system.add_screen(TimerScreen(system))
+    system.add_screen(StarfieldScreen(system))
+    system.add_screen(BatteryScreen(system))
+    system.add_screen(SetDatetimeScreen(system))
 
     system.display.brightness = 1.0
     system.touch.gestureId = 0
-    print("setup done")
 
     while True:
         system.battery._update()
         system.touch.update()
         system.handle_swipe()
-        if system.layout.showing_page_name == 'clock':
-            clockScreen.update(system)
-        if system.layout.showing_page_name == 'settime':
-            datetime.update(system)
-        if system.layout.showing_page_name == 'battery':
-            battery.update(system)
-        if system.layout.showing_page_name == 'starfield':
-            starfield.update(system)
+        system.update_screen()
         # handle long press
         # handle double tap
         system.prevnum = system.touch.fingerNum
         system.display.refresh()
+        
 asyncio.run(main())
